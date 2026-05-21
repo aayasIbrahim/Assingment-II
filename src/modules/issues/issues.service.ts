@@ -20,6 +20,13 @@ const createIssuesIntoDB = async (
 
   return result;
 };
+const getIssuesFromDB=async()=>{
+     const result = await pool.query(`
+      SELECT * FROM issues  
+        `);
+  return result;
+}
 export const issuesService = {
   createIssuesIntoDB,
+  getIssuesFromDB,
 };

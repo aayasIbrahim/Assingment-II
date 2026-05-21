@@ -1,5 +1,11 @@
 import { pool } from "../../db";
-import type { IIssuePayload, IIssueQueryParams, IReporterMap } from "./issues.interface";
+import type {
+  IIssuePayload,
+  IIssueQueryParams,
+  IIssueRow,
+  IReporter,
+  IReporterMap,
+} from "./issues.interface";
 
 const createIssuesIntoDB = async (
   payload: IIssuePayload,
@@ -17,7 +23,7 @@ const createIssuesIntoDB = async (
 
   return result;
 };
-const getIssuesFromDB = async (queryParams: IIssueQueryParams) => {
+const getAllIssuesFromDB = async (queryParams: IIssueQueryParams) => {
   const { sort = "newest", type, status } = queryParams;
 
   // ১. ডাইনামিক বেস কুয়েরি তৈরি
@@ -62,10 +68,13 @@ const getIssuesFromDB = async (queryParams: IIssueQueryParams) => {
   );
 
   // দ্রুত আইডি দিয়ে খোঁজার জন্য অবজেক্ট ম্যাপ তৈরি
-const reporterMap = reportersResult.rows.reduce<IReporterMap>((acc, reporter) => {
-    acc[reporter.id] = reporter;
-    return acc;
-  }, {});
+  const reporterMap = reportersResult.rows.reduce<IReporterMap>(
+    (acc, reporter) => {
+      acc[reporter.id] = reporter;
+      return acc;
+    },
+    {},
+  );
 
   // ৪. ইস্যুর ডাটার সাথে রিপোর্টার অবজেক্ট ম্যাপ করা এবং অতিরিক্ত reporter_id ফিল্ড বাদ দেওয়া
   return issues.map((issue) => {
@@ -76,7 +85,36 @@ const reporterMap = reportersResult.rows.reduce<IReporterMap>((acc, reporter) =>
     };
   });
 };
+const getSingleIssuesFromDB = async (id: string) => {
+  const issueResult = await pool.query<IIssueRow>(
+    `SELECT * FROM issues WHERE id = $1`,
+    [id],
+  );
+
+  if (issueResult.rows.length === 0) {
+    return null;
+  }
+
+  const issue = issueResult.rows[0] as IIssueRow;
+
+  // ২. 🎯 JOIN ছাড়া এই ইস্যুর রিপোর্টারের ডাটা আলাদা কুয়েরিতে তুলে আনা
+  const reporterResult = await pool.query<IReporter>(
+    `SELECT id, name, role FROM users WHERE id = $1`,
+    [issue.reporter_id],
+  );
+
+  const reporter = reporterResult.rows[0] || null;
+
+  // ৩. রেসপন্স ফরম্যাট অনুযায়ী reporter_id বাদ দিয়ে নতুন অবজেক্ট রিটার্ন করা
+  const { reporter_id, ...issueData } = issue;
+
+  return {
+    ...issueData,
+    reporter: reporter,
+  };
+};
 export const issuesService = {
   createIssuesIntoDB,
-  getIssuesFromDB,
+  getAllIssuesFromDB,
+  getSingleIssuesFromDB,
 };

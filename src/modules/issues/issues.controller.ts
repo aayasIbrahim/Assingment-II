@@ -35,8 +35,6 @@ const updateIssue = async (req: Request, res: Response) => {
   const updatebody = req.body;
   if (!req.user) {
     throw new Error("Authentication required to update issues");
-    // Or if you use an async handler wrapper that catches errors:
-    // return res.status(401).json({ message: "Unauthorized" });
   }
 
   const result = await issuesService.updateIssuesFromDB(

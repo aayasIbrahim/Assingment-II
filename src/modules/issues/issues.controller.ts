@@ -5,7 +5,7 @@ import { sendResponse } from "../../utils/sendResponse";
 const createIssues = async (req: Request, res: Response) => {
   const { user } = req;
   const id = user?.id;
-  const result = await issuesService.createIssuesIntoDB(req.body, id);
+  const result = await issuesService.createIssuesIntoDB(req.body, id as number);
   sendResponse(res, 201, {
     message: "Issue created successfully",
     data: result.rows[0],
@@ -32,9 +32,14 @@ const getSingleIssues = async (req: Request, res: Response) => {
 
 const updateIssue = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const updatebody=req.body
+  const updatebody = req.body;
+  if (!req.user) {
+    throw new Error("Authentication required to update issues");
+    // Or if you use an async handler wrapper that catches errors:
+    // return res.status(401).json({ message: "Unauthorized" });
+  }
 
-  const result = await issuesService.updateIssuesIntoDB(
+  const result = await issuesService.updateIssuesFromDB(
     id as string,
     updatebody,
     req.user,

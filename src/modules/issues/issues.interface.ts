@@ -1,4 +1,3 @@
-
 export type TIssueType = "bug" | "feature_request";
 export type TIssueStatus = "open" | "in_progress" | "resolved";
 
@@ -14,7 +13,6 @@ export interface IIssueQueryParams {
   status?: TIssueStatus | string;
 }
 
-
 export interface IIssueRow {
   id: number;
   title: string;
@@ -26,13 +24,11 @@ export interface IIssueRow {
   updated_at: Date;
 }
 
-
 export interface IReporter {
   id: number;
   name: string;
   role: string;
 }
-
 
 export interface IReporterMap {
   [key: number]: IReporter;

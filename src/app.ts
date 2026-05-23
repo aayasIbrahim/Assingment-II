@@ -1,7 +1,7 @@
 import express, { type Application, type Request, type Response } from "express";
-import globalErrorHandler from "./middleware/globelErrorHandler";
-import { userRoute } from "./modules/auth/auth.route";
-import { issuesRoute } from "./modules/issues/issues.route";
+import globalErrorHandler from "./middleware/globelErrorHandler.js";
+import { userRoute } from "./modules/auth/auth.route.js";
+import { issuesRoute } from "./modules/issues/issues.route.js";
 
 const app: Application = express();
 

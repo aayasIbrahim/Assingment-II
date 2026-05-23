@@ -1,8 +1,8 @@
-import jwt, { type JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import type { NextFunction, Request, Response } from "express";
 import { pool } from "../db";
-import config from "../config";
-import type { Roles } from "../types";
+import config from "../config/index.js";
+import type { Roles, TokenPayload } from "../types";
 
 export const auth = (...roles: Roles[]) => {
   return async (
@@ -29,7 +29,7 @@ export const auth = (...roles: Roles[]) => {
       const decoded = jwt.verify(
         token as string,
         config.secret as string,
-      ) as JwtPayload;
+      ) as TokenPayload;
 
     //   console.log("decoded user => ", decoded);
 

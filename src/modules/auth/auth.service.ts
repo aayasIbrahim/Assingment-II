@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import { pool } from "../../db";
 import jwt, { type SignOptions } from "jsonwebtoken";
 
-import config from "../../config";
+import config from "../../config/index.js";
 import type { ILoginPayload, ISignUpPayload } from "./auth.interface";
 const signUpIntoDB = async (payload: ISignUpPayload) => {
   const { name, email, password, role } = payload;

@@ -5,12 +5,9 @@ import config from "../config/index.js";
 import type { Roles, TokenPayload } from "../types";
 
 export const auth = (...roles: Roles[]) => {
-  return async (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     try {
+
       // 1. Get authorization header
       const authHeader = req.headers.authorization;
 
@@ -22,8 +19,18 @@ export const auth = (...roles: Roles[]) => {
         });
       }
 
-      // 3. Extract token from Bearer token
-      const token = authHeader.split(" ")[1];
+      // 3. Extract token cleanly
+      let token = authHeader;
+      if (authHeader.startsWith("Bearer ")) {
+        token = authHeader.split(" ")[1] || "";
+      }
+
+      if (!token) {
+        return res.status(401).json({
+          success: false,
+          message: "Access denied. Token is malformed",
+        });
+      }
 
       // 4. Verify token
       const decoded = jwt.verify(
@@ -31,7 +38,7 @@ export const auth = (...roles: Roles[]) => {
         config.secret as string,
       ) as TokenPayload;
 
-    //   console.log("decoded user => ", decoded);
+      //   console.log("decoded user => ", decoded);
 
       // 5. Find user in database
       const userData = await pool.query(
@@ -40,7 +47,7 @@ export const auth = (...roles: Roles[]) => {
       );
 
       const user = userData.rows[0];
-    //   console.log(user)
+      //   console.log(user)
 
       // 6. Check user exists
       if (!user) {
